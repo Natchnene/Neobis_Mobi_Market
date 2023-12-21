@@ -12,4 +12,3 @@ RUN pip install -U pip && \
 COPY . ./
 COPY ../.env ./.env
 EXPOSE 8000
-ENTRYPOINT [ "bash", "-c", "./entrypoint.sh"]
