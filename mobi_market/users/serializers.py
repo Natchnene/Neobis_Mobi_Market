@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
 from django.contrib import auth
+from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from .models import User
 
@@ -39,6 +39,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -48,9 +49,10 @@ class LoginSerializer(serializers.ModelSerializer):
     def validate(self, data):
         username = data.get('username', '')
         password = data.get('password', '')
-        user = auth.authenticate(username=username, password=password)
+        user = authenticate(username=username, password=password)
+        data['user'] = user
 
         if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
+            raise serializers.ValidationError('Invalid credentials, try again')
 
         return data
