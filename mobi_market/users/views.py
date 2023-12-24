@@ -1,7 +1,8 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer
+from .models import PersonalData
 
 
 class RegisterView(generics.GenericAPIView):
@@ -32,3 +33,8 @@ class LoginView(generics.GenericAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    queryset = PersonalData.objects.all()
+    permission_classes = [permissions.IsAuthenticated]

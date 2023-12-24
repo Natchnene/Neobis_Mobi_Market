@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from .models import User
+from .models import User, PersonalData
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -56,3 +56,12 @@ class LoginSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Invalid credentials, try again')
 
         return data
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PersonalData
+        fields = "__all__"
+
+
