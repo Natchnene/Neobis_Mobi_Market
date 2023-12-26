@@ -3,8 +3,14 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer, PhoneNumberSerializer
-from .models import PersonalData
+from .serializers import (
+    RegisterSerializer,
+    LoginSerializer,
+    ProfileSerializer,
+    PhoneNumberSerializer,
+    CodePhoneNumberSerializer,
+)
+from .models import PersonalData, PhoneNumber
 
 
 class RegisterView(generics.GenericAPIView):
@@ -65,8 +71,9 @@ class ProfileAPIView(generics.GenericAPIView):
 
     def patch(self, request):
         user = request.user
+        request.data['user'] = user.id
         personal_data = PersonalData.objects.get(user_id=user.id)
-        serializer = self.serializer_class(personal_data, data=request.data)
+        serializer = self.serializer_class(personal_data, data=request.data, partial=True)
 
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -75,19 +82,62 @@ class ProfileAPIView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AddPhoneNumberView(generics.UpdateAPIView):
+class AddPhoneNumberAPIView(generics.GenericAPIView):
     serializer_class = PhoneNumberSerializer
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
-    def put(self, request, *args, **kwargs):
-        user_id = request.data['user_id']
-        personal_data = PersonalData.objects.get(pk=user_id)
-        serializer = self.serializer_class(personal_data, data=request.data)
+    def post(self, request):
+        user = request.user
+        request.data['user'] = user.id
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            code_activation = ''.join(choices('0123456789', k=4))
-            personal_data.code_activation = code_activation
-            personal_data.save()
+            phone_number = serializer.save()
+            # code_activation = ''.join(choices('0123456789', k=4))
+            code_activation = '1234'
+            phone_number.code_activation = code_activation
+            phone_number.save()
+            # phone_number = personal_data.phone_number
+            # send_verification_code(phone_number, code_activation)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        user = request.user
+        phone_number = PhoneNumber.objects.get(user_id=user.id)
+        serializer = self.serializer_class(phone_number)
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        request.data['user'] = user.id
+        phone_number = PhoneNumber.objects.get(user_id=user.id)
+        serializer = self.serializer_class(phone_number, data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ActivatePhoneNumberAPIView(generics.GenericAPIView):
+    serializer_class = CodePhoneNumberSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        user = request.user
+        code_activation_request = request.data.get('code_activation')
+        code_activation_user = PhoneNumber.objects.get(user_id=user.id).code_activation
+        if code_activation_request == code_activation_user:
+            user.is_verified = True
+            user.save()
+            return Response(
+                {'message': 'Phone number verified successfully.'}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {'message': 'Please enter the correct verification code.'}, status=status.HTTP_400_BAD_REQUEST
+            )
 

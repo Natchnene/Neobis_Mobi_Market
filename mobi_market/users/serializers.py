@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from .models import User, PersonalData
+from .models import User, PersonalData, PhoneNumber
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -64,11 +64,19 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PersonalData
-        fields = ['name', 'last_name', 'photo', 'phone_number', 'birth_date', 'email', 'username', 'user']
+        fields = ['name', 'last_name', 'photo', 'birth_date', 'email', 'username', 'user']
 
 
 class PhoneNumberSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = PersonalData
-        fields = ['phone_number']
+        model = PhoneNumber
+        fields = ['phone_number', 'user']
+
+
+class CodePhoneNumberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PhoneNumber
+        fields = ['code_activation', 'user']
+
