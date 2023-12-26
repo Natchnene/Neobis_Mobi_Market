@@ -22,6 +22,7 @@ class PersonalData(models.Model):
     last_name = models.CharField(max_length=200, blank=False)
     photo = models.ImageField(null=True, blank=True)
     phone_number = models.CharField(max_length=15, blank=False, unique=True)
+    code_activation = models.PositiveIntegerField(blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 

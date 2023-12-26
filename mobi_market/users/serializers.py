@@ -59,9 +59,16 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = PersonalData
-        fields = "__all__"
+        fields = ['name', 'last_name', 'photo', 'phone_number', 'birth_date', 'email', 'username', 'user']
 
 
+class PhoneNumberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PersonalData
+        fields = ['phone_number']
