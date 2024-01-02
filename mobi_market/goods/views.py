@@ -63,5 +63,21 @@ class CardProductShortLikedListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return user.likes.all()
+        return user.liked_card_products.all()
+
+
+class CarsProductLikeGenericAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def patch(self, request, product_id):
+        user = request.user
+        if not user.is_verified:
+            return Response({'message': 'You need to confirm your phone number.'})
+        try:
+            card_product = CardProduct.objects.get(id=product_id)
+        except card_product.DoesNotExist:
+            return Response({'error': 'Card item not found.'}, status=status.HTTP_404_NOT_FOUND)
+        card_product.likes.add(user.id)
+        return Response({'message': 'Product liked successfully.'}, status=status.HTTP_200_OK)
 
