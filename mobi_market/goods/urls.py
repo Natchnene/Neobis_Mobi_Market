@@ -6,6 +6,7 @@ from .views import (
     CardProductShortAllListAPIView,
     CardProductShortUserListAPIView,
     CardProductShortLikedListAPIView,
+    CarsProductLikeGenericAPIView,
 )
 
 router = routers.DefaultRouter()
@@ -16,5 +17,6 @@ urlpatterns = [
     path('products_all/', CardProductShortAllListAPIView.as_view(), name='products_all_main_page'),
     path('products_user/', CardProductShortUserListAPIView.as_view(), name='products_user'),
     path('products_user_liked/', CardProductShortLikedListAPIView.as_view(), name='products_user_liked'),
+    path('product/like/<int:id>/', CardProductShortLikedListAPIView.as_view(), name='product_like'),
 ]
 
