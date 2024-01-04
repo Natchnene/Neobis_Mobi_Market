@@ -66,7 +66,7 @@ class CardProductShortLikedListAPIView(generics.ListAPIView):
         return user.liked_card_products.all()
 
 
-class CarsProductLikeGenericAPIView(generics.GenericAPIView):
+class CardProductLikeGenericAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -80,4 +80,18 @@ class CarsProductLikeGenericAPIView(generics.GenericAPIView):
             return Response({'error': 'Card item not found.'}, status=status.HTTP_404_NOT_FOUND)
         card_product.likes.add(user.id)
         return Response({'message': 'Product liked successfully.'}, status=status.HTTP_200_OK)
+
+
+class CardProductUnLikeGenericAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def patch(self, request, product_id):
+        user = request.user
+        try:
+            card_product = CardProduct.objects.get(id=product_id)
+        except card_product.DoesNotExist:
+            return Response({'error': 'Card item not found.'}, status=status.HTTP_404_NOT_FOUND)
+        card_product.likes.remove(user.id)
+        return Response({'message': 'Liked successfully deleted.'}, status=status.HTTP_200_OK)
 
