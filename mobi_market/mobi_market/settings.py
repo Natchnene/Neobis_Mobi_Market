@@ -152,5 +152,11 @@ SIMPLE_JWT = {
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = ['https://']
+CORS_ALLOWED_ORIGINS = [
+    "https://kunasyl-backender.org.kg"
+]
+
+CSRF_TRUSTED_ORIGINS = ['https://kunasyl-backender.org.kg']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
